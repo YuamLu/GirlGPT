@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片上傳與對話</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Noto Sans", sans-serif;
+        }
+
+        .uploadCard {
+            display: flex;
+            flex-wrap: nowrap;
+            width: 40%;
+            height: 40%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .uploadCell {
+            width: 45%;
+            height: 100%;
+            background-color: #e7e7e7;
+            margin-left: 5%;
+            margin-right: 5%;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .uploadCell:hover {
+            background-color: #d1d1d1;
+            cursor: pointer;
+        }
+
+        .uploadCellInner {
+            text-align: center;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .uploadLabel {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .uploadLabel:hover {
+            background-color: #2980b9;
+        }
+
+        #preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* 大對話框 */
+        .chatContainer {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            display: none;
+        }
+
+        .chatHeader {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .chatImage {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .chatArea {
+            width: 90%;
+            height: 60%;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .chatInput {
+            width: 90%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+        }
+
+        .closeButton {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .closeButton:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="uploadCard" id="uploadCard">
+        <!-- 上傳圖片 -->
+        <div class="uploadCell" id="uploadCell">
+            <div class="uploadCellInner">
+                <h1>上傳截圖</h1>
+                <label for="fileInput" class="uploadLabel">選擇圖片</label>
+                <input type="file" id="fileInput" accept="image/*">
+                <img id="preview" alt="圖片預覽">
+            </div>
+        </div>
+
+        <!-- 手動輸入 -->
+        <div class="uploadCell">
+            <div class="uploadCellInner">
+                <h1>手動輸入</h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- 對話模式 -->
+    <div class="chatContainer" id="chatContainer">
+        <div class="chatHeader">對話區</div>
+        <img id="chatImage" class="chatImage">
+        <div class="chatArea" id="chatArea"></div>
+        <input type="text" class="chatInput" id="chatInput" placeholder="輸入訊息...">
+        <button class="closeButton" onclick="closeChat()">縮小</button>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById("fileInput");
+        const preview = document.getElementById("preview");
+        const uploadCard = document.getElementById("uploadCard");
+        const chatContainer = document.getElementById("chatContainer");
+        const chatImage = document.getElementById("chatImage");
+        const chatInput = document.getElementById("chatInput");
+        const chatArea = document.getElementById("chatArea");
+
+        fileInput.addEventListener("change", function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // 設定圖片
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                    chatImage.src = e.target.result;
+
+                    // 顯示對話區
+                    openChat();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function openChat() {
+            // 隱藏小 cell
+            uploadCard.style.display = "none";
+            // 顯示大對話框
+            chatContainer.style.display = "flex";
+        }
+
+        function closeChat() {
+            // 顯示小 cell
+            uploadCard.style.display = "flex";
+            // 隱藏對話框
+            chatContainer.style.display = "none";
+        }
+
+        chatInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter" && this.value.trim() !== "") {
+                sendMessage(this.value);
+                this.value = "";
+            }
+        });
+
+        function sendMessage(message) {
+            const messageDiv = document.createElement("div");
+            messageDiv.textContent = message;
+            messageDiv.style.padding = "5px";
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <title></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        select {
+            width: 20%;
+            padding: 12px 15px;
+            font-size: 18px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+            color: #333;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        option {
+            padding: 10px;
+        }
+
+        
+        .chatbox{
+            height: fit-content;
+            width: 80%;
+            background-color: white;
+            border-radius: 20px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .myInputArea{
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .myMessageArea{
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+
+        }
+        .GPTmessageArea{
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 10px;
+        }
+        .myMessageBox{
+            height: fit-content;
+            width: fit-content;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: rgb(195, 252, 233);
+        }
+        .GPTmessageBox{
+            height: fit-content;
+            width: fit-content;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: rgb(252, 206, 238);
+        }
+        .myInputBox{
+            height: fit-content;
+            width: 70%;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #f5f5f5;
+        }
+
+        .addMessageButton {
+            width: 35px;
+            height: 35px;
+            font-size: 15px;
+            font-weight: bold;
+            border: solid 1px #a7a7a7;
+            border-radius: 10px;
+            background-color: white;
+            cursor: pointer;
+
+        }
+        .sendMessageButton{
+            background-color: #007bff; /* 藍色 */
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .sendMessageButton:hover{
+            background-color: #0056b3;
+        }
+        .addMessageButton:hover {
+            background-color: rgb(209, 209, 209);
+        }
+        .messagePending {
+            margin-left: 5px;
+            width: 70%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background-color: #fafafa;
+            color: #333;
+            outline: none;
+            box-sizing: border-box;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .messagePending:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .messagePending::placeholder {
+            color: #888;
+            font-style: italic;
+        }
+
+        #imgInputBox{
+            width: 100%;
+            border: solid 1px #a7a7a7;
+            border-radius: 10px;
+            height: 50px;
+        }
+
+        #textInputBox{
+            margin-top: 10px;
+            width: 100%;
+            border: solid 1px #a7a7a7;
+            border-radius: 10px;
+            height: 200px;
+            padding: 10px;
+            overflow: auto;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="chatbox" class="chatbox">
+
+        <!--對話輸入框-->
+        <div class="myInputArea">
+            <div class="myInputBox">
+                <div id="imgInputBox">
+
+                </div>
+                <div style="text-align: center;">
+                    或
+                </div>
+                <div id="textInputBox">
+                    <!--已建立的訊息填寫框-->
+                    <div style="display: flex;flex-wrap: nowrap;justify-content: end; margin-top: 10px;">
+                        <select id="character0" name="character">
+                            <option value="self">自己</option>
+                            <option value="usr">對方</option>
+                        </select>
+                        <input type="text" id="messagePending0" name="messagePending" class="messagePending">
+                    </div>
+
+                    <!--建立新的訊息填寫框-->
+                    <div style="display: flex;justify-content: end; margin-top: 10px;">
+                        <button class="addMessageButton" onclick="addMessageBox()">+</button>
+                    </div>
+                </div>
+                <!--傳送訊息-->
+                <div style="display: flex;justify-content: end;margin-top: 10px;">
+                    <button class="sendMessageButton" onclick="sendMessage()">傳送</button>
+                </div>
+            </div>
+        </div>
+
+        <!--對話紀錄-我方-->
+        <!--
+        <div class="myMessageArea">
+            <div class="myMessageBox">
+                <p>這是我傳的訊息或圖片</p>
+            </div>
+        </div>
+
+        
+        <div class="GPTmessageArea">
+            <div class="GPTmessageBox">
+                <p>這是GPT傳的訊息</p>
+            </div>
+        </div>
+        -->
+    </div>
+
+    <script>
+        let messageCount = 1; // 記錄訊息框數量
+
+        // 添加新的訊息填寫框
+        /*
+        function addMessageBox() {
+            const newMessageBox = document.createElement('div');
+            newMessageBox.style.display = "flex";
+            newMessageBox.style.justifyContent = "end";
+            newMessageBox.style.marginTop = "10px";
+            newMessageBox.innerHTML = `
+                <select id="character${messageCount}" name="character">
+                    <option value="self">自己</option>
+                    <option value="usr">對方</option>
+                </select>
+                <input type="text" id="messagePending${messageCount}" name="messagePending" class="messagePending">
+            `;
+            // 使用 insertBefore 將新訊息框插入到按鈕上方
+            document.getElementById('textInputBox').insertBefore(newMessageBox, document.querySelector('.addMessageButton').parentNode);
+            messageCount++;
+        }*/
+       // 添加新的訊息填寫框
+        function addMessageBox() {
+            const newMessageBox = document.createElement('div');
+            newMessageBox.style.display = "flex";
+            newMessageBox.style.justifyContent = "end";
+            newMessageBox.style.marginTop = "10px";
+
+            // 新增一個X按鈕
+            const deleteButton = document.createElement('button');
+            deleteButton.innerText = 'X';
+            deleteButton.style.marginRight = '10px';
+            deleteButton.style.cursor = 'pointer';
+            deleteButton.style.background = 'red';
+            deleteButton.style.color = 'white';
+            deleteButton.style.border = 'none';
+            deleteButton.style.borderRadius = '50%';
+            deleteButton.style.width = '25px';
+            deleteButton.style.height = '25px';
+            deleteButton.style.textAlign = 'center';
+            deleteButton.style.fontSize = '16px';
+            
+            // 點擊刪除按鈕時刪除對應的訊息框
+            deleteButton.addEventListener('click', function() {
+                newMessageBox.remove();
+            });
+
+            // 設定新增訊息框的內容
+            newMessageBox.innerHTML = `
+                <select id="character${messageCount}" name="character">
+                    <option value="self">自己</option>
+                    <option value="usr">對方</option>
+                </select>
+                <input type="text" id="messagePending${messageCount}" name="messagePending" class="messagePending">
+            `;
+
+            // 在訊息框前插入X按鈕
+            newMessageBox.insertBefore(deleteButton, newMessageBox.firstChild);
+
+            // 把新的訊息框插入到#textInputBox
+            document.getElementById('textInputBox').insertBefore(newMessageBox, document.querySelector('.addMessageButton').parentNode);
+            messageCount++;
+        }
+
+        function sendMessage() {
+            let result = "<chat>";
+            let formattedMessage = ""; // 用於顯示在 myMessageArea 的格式化文字
+
+            for (let i = 0; i < messageCount; i++) {
+                try {
+                    const character = document.getElementById(`character${i}`);
+                    const messageElement = document.getElementById(`messagePending${i}`);
+                    if (!character || !messageElement) continue; // 跳過已刪除的元素
+                    
+                    const message = messageElement.value.trim();
+                    if (message) {
+                        result += `<${character.value}>${message}</${character.value}>`;
+                        formattedMessage += `${character.value === 'self' ? "您" : "對方"}: ${message}<br>`; // **換行**
+                    }
+                } catch (error) {
+                    console.warn(`Message box ${i} does not exist. Skipping.`);
+                    continue;
+                }
+            }
+            result += "</chat>";
+
+            // **1. 暫時刪除 myInputArea**
+            const myInputArea = document.querySelector(".myInputArea");
+            if (myInputArea) {
+                myInputArea.remove();
+            }
+
+            // **2. 新增 myMessageArea (符合提供的 HTML 結構)**
+            const chatbox = document.getElementById("chatbox");
+            const myMessageArea = document.createElement("div");
+            myMessageArea.className = "myMessageArea";
+            myMessageArea.innerHTML = `
+                <div class="myMessageBox">
+                    <p>${formattedMessage}</p>
+                </div>
+            `;
+            chatbox.appendChild(myMessageArea);
+
+            // **3. 新增 GPTmessageArea (初始內容: 等待回應...)**
+            const GPTmessageArea = document.createElement("div");
+            GPTmessageArea.className = "GPTmessageArea";
+            GPTmessageArea.innerHTML = `
+                <div class="GPTmessageBox">
+                    <p>(等待回應......)</p>
+                </div>
+            `;
+            chatbox.appendChild(GPTmessageArea);
+
+            // **4. 傳送 API 請求**
+            const data = { chat_text: result };
+            fetch('/api/process-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json()) // 解析 JSON
+            .then(data => {
+                console.log("Server Response:", data);
+
+                // 確保回應包含 analysis 和 suggestion
+                const analysis = data.analysis || "無分析";
+                const suggestion = data.suggestion || "無建議";
+
+                // **更新 GPTmessageArea (符合提供的 HTML 格式)**
+                GPTmessageArea.innerHTML = `
+                    <div class="GPTmessageBox">
+                        <p><strong>${analysis}</strong><br>${suggestion}</p>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error("Error sending message:", error);
+                GPTmessageArea.innerHTML = `
+                    <div class="GPTmessageBox">
+                        <p>（錯誤：無法取得回應）</p>
+                    </div>
+                `;
+            })
+            .finally(() => {
+                // **5. 重新新增 myInputArea，確保 HTML 結構符合需求**
+                const newMyInputArea = document.createElement("div");
+                newMyInputArea.className = "myInputArea";
+                newMyInputArea.innerHTML = `
+                    <div class="myInputBox">
+                        <div id="imgInputBox"></div>
+                        <div style="text-align: center;">或</div>
+                        <div id="textInputBox">
+                            <!--已建立的訊息填寫框-->
+                            <div style="display: flex;flex-wrap: nowrap;justify-content: end; margin-top: 10px;">
+                                <select id="character0" name="character">
+                                    <option value="self">自己</option>
+                                    <option value="usr">對方</option>
+                                </select>
+                                <input type="text" id="messagePending0" name="messagePending" class="messagePending">
+                            </div>
+
+                            <!--建立新的訊息填寫框-->
+                            <div style="display: flex;justify-content: end; margin-top: 10px;">
+                                <button class="addMessageButton" onclick="addMessageBox()">+</button>
+                            </div>
+                        </div>
+                        <!--傳送訊息-->
+                        <div style="display: flex;justify-content: end;margin-top: 10px;">
+                            <button class="sendMessageButton" onclick="sendMessage()">傳送</button>
+                        </div>
+                    </div>
+                `;
+                chatbox.appendChild(newMyInputArea);
+            });
+        }
+
+
+
+
+
+    </script>
+</body>
+</html>
