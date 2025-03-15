@@ -5,27 +5,56 @@ This module provides a function to process chat screenshots and convert them
 into structured text format using OpenAI's vision capabilities.
 """
 import os
+import base64
 from dotenv import load_dotenv
 from openai import OpenAI
 
 # Load environment variables from .env file
 load_dotenv()
 
-def img2chat(image_url):
+def encode_image(image_path):
+    """
+    Encode an image file to base64.
+    
+    Args:
+        image_path (str): Path to the image file
+        
+    Returns:
+        str: Base64 encoded image string
+    """
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
+
+def img2chat(image_input):
     """
     Convert a chat screenshot to structured text using OpenAI's GPT-4o model.
 
-    This function takes an image URL of a chat screenshot and uses OpenAI's
-    GPT-4o model to extract the conversation in a structured format.
+    This function takes either an image path or a base64 encoded image string
+    and uses OpenAI's GPT-4o model to extract the conversation in a structured format.
 
     Args:
-        image_url (str): URL or base64 encoded image of the chat screenshot
+        image_input (str): Either a file path to an image, a URL, or a base64 encoded image
 
     Returns:
-        dict: The response from OpenAI containing the structured chat text
+        str: The structured chat text extracted from the image
     """
     # Initialize OpenAI client with API key from environment variable
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    
+    # Determine if the input is a file path, URL, or base64 string
+    if os.path.isfile(image_input):
+        # It's a file path, encode it to base64
+        base64_image = encode_image(image_input)
+        image_url = f"data:image/jpeg;base64,{base64_image}"
+    elif image_input.startswith("data:image"):
+        # It's already a base64 data URL
+        image_url = image_input
+    elif image_input.startswith("http"):
+        # It's a URL
+        image_url = image_input
+    else:
+        # Assume it's a raw base64 string
+        image_url = f"data:image/jpeg;base64,{image_input}"
 
     response = client.chat.completions.create(
         model="gpt-4o",
@@ -61,6 +90,11 @@ def img2chat(image_url):
     return response.choices[0].message.content
 
 
-# https://hackmd.io/_uploads/SJpzusfnkl.png
 if __name__ == "__main__":
+    # Example usage with a URL
+    print("Example with URL:")
     print(img2chat("https://hackmd.io/_uploads/SJpzusfnkl.png"))
+    
+    # Example usage with a file path
+    print("\nExample with file path:")
+    print(img2chat("tst_img/tst1.png"))
