@@ -7,7 +7,7 @@ manual text input, and generating response suggestions.
 import os
 import base64
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
@@ -50,12 +50,13 @@ def generate_response(chat_text):
     # Placeholder implementation
     return {
         "analysis": "This is a placeholder analysis of the conversation.",
-        "suggestions": [
-            "Here's a suggested response 1",
-            "Here's a suggested response 2",
-            "Here's a suggested response 3"
-        ]
+        "suggestion": "Here's a suggested response based on the conversation."
     }
+
+@app.route('/', methods=['GET'])
+def index():
+    """Serve the main HTML page"""
+    return send_file('index.html')
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -96,7 +97,7 @@ def process_image():
                 return jsonify({
                     "chat_text": chat_text,
                     "analysis": response_data["analysis"],
-                    "suggestions": response_data["suggestions"]
+                    "suggestion": response_data["suggestion"]
                 })
             else:
                 return jsonify({"error": "File type not allowed"}), 400
@@ -115,7 +116,7 @@ def process_image():
             return jsonify({
                 "chat_text": chat_text,
                 "analysis": response_data["analysis"],
-                "suggestions": response_data["suggestions"]
+                "suggestion": response_data["suggestion"]
             })
             
         else:
@@ -143,7 +144,7 @@ def process_text():
         # Return the results
         return jsonify({
             "analysis": response_data["analysis"],
-            "suggestions": response_data["suggestions"]
+            "suggestion": response_data["suggestion"]
         })
         
     except Exception as e:
