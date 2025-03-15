@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <title></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .uploadCard {
+            display: flex;
+            flex-wrap: nowrap;
+            width: 40%;
+            height: 40%;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.5s ease-in-out;
+        }
+        .uploadCell {
+            width: 45%;
+            height: 100%;
+            background-color: #e7e7e7;
+            margin-left: 5%;
+            margin-right: 5%;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s ease-in-out;
+            position: relative;
+        }
+        .uploadCell:hover {
+            background-color: #d1d1d1;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+
+        .uploadCellInner{
+            text-align: center;
+        }
+        #fileInput {
+            display: none;
+        }
+        /* 讓 label 看起來像按鈕 */
+        .uploadLabel {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .uploadLabel:hover {
+            background-color: #2980b9;
+        }
+        #preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-top: 10px;
+            display: none; /* 預設不顯示 */
+        }
+    </style>
+</head>
+<body>
+    <div class="uploadCard">
+        <!-- 上傳圖片 -->
+        <div class="uploadCell" id="uploadCell">
+            <div class="uploadCellInner">
+                <h1>上傳截圖</h1>
+                <label for="fileInput" class="uploadLabel">選擇圖片</label>
+                <input type="file" id="fileInput" accept="image/*">
+                <img id="preview" alt="圖片預覽">
+            </div>
+        </div>
+
+        <!-- 手動輸入 -->
+        <div class="uploadCell" id="manualCell">
+            <div class="uploadCellInner">
+                <h1>手動輸入</h1>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    const fileInput = document.getElementById("fileInput");
+    const preview = document.getElementById("preview");
+    const uploadCell = document.getElementById("uploadCell");
+    const manualCell = document.getElementById("manualCell");
+
+    fileInput.addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // 轉換成聊天區塊
+                uploadCell.innerHTML = `
+                    <button class="backButton" onclick="shrinkBack()">返回</button>
+                    <img id="previewLarge" src="${e.target.result}" class="preview-large">
+                    <div class="chatArea" id="chatArea"></div>
+                    <div class="chatInputArea">
+                        <input type="text" id="chatInput" class="chatInput" placeholder="輸入訊息...">
+                        <button class="sendButton" onclick="sendMessage()">送出</button>
+                    </div>
+                `;
+
+                uploadCell.classList.add("fullscreen");
+                manualCell.classList.add("hidden");
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function shrinkBack() {
+        uploadCell.innerHTML = `
+            <div class="uploadCellInner">
+                <h1>上傳截圖</h1>
+                <label for="fileInput" class="uploadLabel">選擇圖片</label>
+                <input type="file" id="fileInput" accept="image/*">
+                <img id="preview" alt="圖片預覽">
+            </div>
+        `;
+        uploadCell.classList.remove("fullscreen");
+        manualCell.classList.remove("hidden");
+
+        document.getElementById("fileInput").addEventListener("change", fileInput.change);
+    }
+
+    function sendMessage() {
+        const chatInput = document.getElementById("chatInput");
+        const chatArea = document.getElementById("chatArea");
+        const message = chatInput.value.trim();
+        if (message) {
+            chatArea.innerHTML += `<div class="message userMessage">${message}</div>`;
+            chatInput.value = "";
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+    }
+</script>
+</html>
