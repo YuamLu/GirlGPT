@@ -91,10 +91,6 @@ def img2chat(image_input):
 
 
 if __name__ == "__main__":
-    # Example usage with a URL
-    print("Example with URL:")
-    print(img2chat("https://hackmd.io/_uploads/SJpzusfnkl.png"))
-    
     # Example usage with a file path
     print("\nExample with file path:")
     print(img2chat("tst_img/tst1.png"))
