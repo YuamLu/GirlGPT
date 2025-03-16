@@ -9,7 +9,6 @@ import base64
 import json
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from img2chat import img2chat
 from chat_analysis import get_suggestion
@@ -21,14 +20,10 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Configure upload folder for images
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Configure max content length
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
 
-# Create uploads directory if it doesn't exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     """Check if the file extension is allowed"""
@@ -99,14 +94,13 @@ def process_image():
                 return jsonify({"error": "No selected file"}), 400
                 
             if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(filepath)
+                # Read file data directly and convert to base64
+                file_data = file.read()
+                base64_image = base64.b64encode(file_data).decode('utf-8')
                 
-                # Convert file to base64 for processing
-                with open(filepath, "rb") as image_file:
-                    base64_image = base64.b64encode(image_file.read()).decode('utf-8')
-                image_url = f"data:image/{filepath.split('.')[-1]};base64,{base64_image}"
+                # Get file extension
+                file_ext = file.filename.rsplit('.', 1)[1].lower()
+                image_url = f"data:image/{file_ext};base64,{base64_image}"
                 
                 # Process the image
                 chat_text = img2chat(image_url)
