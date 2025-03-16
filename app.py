@@ -12,6 +12,7 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from img2chat import img2chat
+from chat_analysis import get_suggestion
 
 # Load environment variables
 load_dotenv()
@@ -38,8 +39,8 @@ def generate_response(chat_text):
     """
     Generate response suggestions based on chat text.
     
-    This is a placeholder function that will be replaced with the actual
-    implementation once it's developed.
+    Uses the get_suggestion function from chat_analysis.py to generate
+    response suggestions based on the provided chat text.
     
     Args:
         chat_text (str): The chat text to analyze
@@ -47,10 +48,30 @@ def generate_response(chat_text):
     Returns:
         dict: Analysis and response suggestions
     """
-    # Placeholder implementation
+    # Get suggestion from chat_analysis module
+    suggestion_text = get_suggestion(chat_text)
+    
+    # Parse the XML response to extract suggestion and example
+    # The response format is expected to be:
+    # <suggestion>Suggestion text</suggestion><example>Example text</example>
+    
+    analysis = "分析中..."
+    suggestion = suggestion_text
+    
+    # Simple parsing of XML tags (could be improved with proper XML parsing)
+    if "<suggestion>" in suggestion_text and "</suggestion>" in suggestion_text:
+        start_idx = suggestion_text.find("<suggestion>") + len("<suggestion>")
+        end_idx = suggestion_text.find("</suggestion>")
+        analysis = suggestion_text[start_idx:end_idx].strip()
+    
+    if "<example>" in suggestion_text and "</example>" in suggestion_text:
+        start_idx = suggestion_text.find("<example>") + len("<example>")
+        end_idx = suggestion_text.find("</example>")
+        suggestion = suggestion_text[start_idx:end_idx].strip()
+    
     return {
-        "analysis": "This is a placeholder analysis of the conversation.",
-        "suggestion": "Here's a suggested response based on the conversation."
+        "analysis": analysis,
+        "suggestion": suggestion
     }
 
 @app.route('/', methods=['GET'])
@@ -151,5 +172,5 @@ def process_text():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 4998))
+    port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port, debug=True) 

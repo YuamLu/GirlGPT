@@ -246,24 +246,8 @@
                 selectedImage = file;
                 document.getElementById('selectedFileName').textContent = file.name;
 
-                // 添加上傳按鈕
-                const imgInputBox = document.getElementById('imgInputBox');
-                if (!document.getElementById('uploadImageBtn')) {
-                    const uploadBtn = document.createElement('button');
-                    uploadBtn.id = 'uploadImageBtn';
-                    uploadBtn.textContent = '上傳圖片';
-                    uploadBtn.style.marginLeft = '10px';
-                    uploadBtn.style.padding = '5px 10px';
-                    uploadBtn.style.backgroundColor = '#007bff';
-                    uploadBtn.style.color = 'white';
-                    uploadBtn.style.border = 'none';
-                    uploadBtn.style.borderRadius = '5px';
-                    uploadBtn.style.cursor = 'pointer';
-                    uploadBtn.onclick = uploadImage;
-
-                    const container = imgInputBox.querySelector('div');
-                    container.appendChild(uploadBtn);
-                }
+                // 選擇圖片後立即上傳，不需要額外的上傳按鈕
+                uploadImage();
             }
         }
 
@@ -309,26 +293,50 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     console.log("Server Response:", data);
 
                     // 確保回應包含 analysis 和 suggestion
                     const analysis = data.analysis || "無分析";
                     const suggestion = data.suggestion || "無建議";
+                    const chatText = data.chat_text || "";
 
-                    // 更新 GPTmessageArea
+                    // 處理 chatText，去掉外層的 <chat> 標記
+                    let formattedChatText = chatText;
+                    if (formattedChatText.startsWith("<chat>") && formattedChatText.endsWith("</chat>")) {
+                        formattedChatText = formattedChatText.substring(6, formattedChatText.length - 7);
+                    }
+
+                    // 先顯示識別的聊天內容
                     GPTmessageArea.innerHTML = `
                     <div class="GPTmessageBox">
-                        <p><strong>${analysis}</strong><br>${suggestion}</p>
+                        <p><strong>識別的聊天內容：</strong><br>${formattedChatText}</p>
                     </div>
-                `;
+                    `;
+
+                    // 創建新的 GPTmessageArea 來顯示分析和建議
+                    const analysisArea = document.createElement("div");
+                    analysisArea.className = "GPTmessageArea";
+                    analysisArea.innerHTML = `
+                        <div class="GPTmessageBox">
+                            <p><strong>分析：</strong><br>${analysis}</p>
+                            <p><strong>建議回覆：</strong><br>${suggestion}</p>
+                        </div>
+                    `;
+                    chatbox.appendChild(analysisArea);
                 })
                 .catch(error => {
                     console.error("Error uploading image:", error);
                     GPTmessageArea.innerHTML = `
                     <div class="GPTmessageBox">
                         <p>（錯誤：無法取得回應）</p>
+                        <p>錯誤詳情：${error.message}</p>
                     </div>
                 `;
                 })
@@ -492,7 +500,12 @@
                     },
                     body: JSON.stringify(data)
                 })
-                .then(response => response.json()) // 解析 JSON
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     console.log("Server Response:", data);
 
@@ -500,18 +513,36 @@
                     const analysis = data.analysis || "無分析";
                     const suggestion = data.suggestion || "無建議";
 
-                    // **更新 GPTmessageArea (符合提供的 HTML 格式)**
+                    // 處理 result，去掉外層的 <chat> 標記
+                    let formattedChatText = result;
+                    if (formattedChatText.startsWith("<chat>") && formattedChatText.endsWith("</chat>")) {
+                        formattedChatText = formattedChatText.substring(6, formattedChatText.length - 7);
+                    }
+
+                    // 先顯示原始聊天文本
                     GPTmessageArea.innerHTML = `
                     <div class="GPTmessageBox">
-                        <p><strong>${analysis}</strong><br>${suggestion}</p>
+                        <p><strong>識別的聊天內容：</strong><br>${formattedChatText}</p>
                     </div>
-                `;
+                    `;
+
+                    // 創建新的 GPTmessageArea 來顯示分析和建議
+                    const analysisArea = document.createElement("div");
+                    analysisArea.className = "GPTmessageArea";
+                    analysisArea.innerHTML = `
+                        <div class="GPTmessageBox">
+                            <p><strong>分析：</strong><br>${analysis}</p>
+                            <p><strong>建議回覆：</strong><br>${suggestion}</p>
+                        </div>
+                    `;
+                    chatbox.appendChild(analysisArea);
                 })
                 .catch(error => {
                     console.error("Error sending message:", error);
                     GPTmessageArea.innerHTML = `
                     <div class="GPTmessageBox">
                         <p>（錯誤：無法取得回應）</p>
+                        <p>錯誤詳情：${error.message}</p>
                     </div>
                 `;
                 })
