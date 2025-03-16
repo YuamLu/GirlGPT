@@ -45,7 +45,7 @@
         
         .chatbox {
             height: fit-content;
-            width: 80%;
+            width: 90%;
             background-color: white;
             border-radius: 20px;
             margin-top: 10px;
@@ -190,7 +190,7 @@
                 <div id="textInputBox">
                     <!--已建立的訊息填寫框-->
                     <div style="display: flex;flex-wrap: nowrap;justify-content: end; margin-top: 10px;">
-                        <select id="character0" name="character">
+                        <select id="character0" name="character" style="width: 90px;">
                             <option value="self">自己</option>
                             <option value="usr">對方</option>
                         </select>
@@ -420,7 +420,7 @@
 
             // 設定新增訊息框的內容
             newMessageBox.innerHTML = `
-                <select id="character${messageCount}" name="character">
+                <select id="character${messageCount}" name="character" style="width: 90px;">
                     <option value="self">自己</option>
                     <option value="usr">對方</option>
                 </select>
