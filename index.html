@@ -313,23 +313,18 @@
                         formattedChatText = formattedChatText.substring(6, formattedChatText.length - 7);
                     }
 
-                    // 先顯示識別的聊天內容
+                    // 將 XML 格式轉換為更友好的格式
+                    formattedChatText = formattedChatText
+                        .replace(/<self>(.*?)<\/self>/g, "我：$1")
+                        .replace(/<usr>(.*?)<\/usr>/g, "你：$1");
+
+                    // 直接顯示分析和建議，不顯示識別的聊天內容
                     GPTmessageArea.innerHTML = `
                     <div class="GPTmessageBox">
-                        <p><strong>識別的聊天內容：</strong><br>${formattedChatText}</p>
+                        <p><strong>分析：</strong><br>${analysis}</p>
+                        <p><strong>建議回覆：</strong><br>${suggestion}</p>
                     </div>
                     `;
-
-                    // 創建新的 GPTmessageArea 來顯示分析和建議
-                    const analysisArea = document.createElement("div");
-                    analysisArea.className = "GPTmessageArea";
-                    analysisArea.innerHTML = `
-                        <div class="GPTmessageBox">
-                            <p><strong>分析：</strong><br>${analysis}</p>
-                            <p><strong>建議回覆：</strong><br>${suggestion}</p>
-                        </div>
-                    `;
-                    chatbox.appendChild(analysisArea);
                 })
                 .catch(error => {
                     console.error("Error uploading image:", error);
@@ -519,23 +514,18 @@
                         formattedChatText = formattedChatText.substring(6, formattedChatText.length - 7);
                     }
 
-                    // 先顯示原始聊天文本
+                    // 將 XML 格式轉換為更友好的格式
+                    formattedChatText = formattedChatText
+                        .replace(/<self>(.*?)<\/self>/g, "我：$1")
+                        .replace(/<usr>(.*?)<\/usr>/g, "你：$1");
+
+                    // 直接顯示分析和建議，不顯示識別的聊天內容
                     GPTmessageArea.innerHTML = `
                     <div class="GPTmessageBox">
-                        <p><strong>識別的聊天內容：</strong><br>${formattedChatText}</p>
+                        <p><strong>分析：</strong><br>${analysis}</p>
+                        <p><strong>建議回覆：</strong><br>${suggestion}</p>
                     </div>
                     `;
-
-                    // 創建新的 GPTmessageArea 來顯示分析和建議
-                    const analysisArea = document.createElement("div");
-                    analysisArea.className = "GPTmessageArea";
-                    analysisArea.innerHTML = `
-                        <div class="GPTmessageBox">
-                            <p><strong>分析：</strong><br>${analysis}</p>
-                            <p><strong>建議回覆：</strong><br>${suggestion}</p>
-                        </div>
-                    `;
-                    chatbox.appendChild(analysisArea);
                 })
                 .catch(error => {
                     console.error("Error sending message:", error);
